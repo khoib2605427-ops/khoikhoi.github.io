@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trần Tuấn Khôi - Trang Web Cá Nhân</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            purple: '#a855f7',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 3s infinite alternate',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        pulseGlow: {
+                            '0%': { boxShadow: '0 0 15px rgba(14, 165, 233, 0.3)' },
+                            '100%': { boxShadow: '0 0 35px rgba(168, 85, 247, 0.6)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px -10px rgba(14, 165, 233, 0.25);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #38bdf8 0%, #a855f7 50%, #f43f5e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-text-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Canvas Particle Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Chess Board Styles */
+        .chess-square {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        .square-light { background-color: #e2e8f0; color: #1e293b; }
+        .square-dark { background-color: #334155; color: #f8fafc; }
+        .chess-square:hover { filter: brightness(1.2); }
+        .square-selected { background-color: #38bdf8 !important; color: #fff !important; }
+        .square-target { position: relative; }
+        .square-target::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: rgba(16, 185, 129, 0.8);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- Background Dynamic Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <header class="sticky top-0 z-50 px-4 lg:px-12 py-4">
+        <nav class="max-w-7xl mx-auto glass-card rounded-2xl px-6 py-3 flex items-center justify-between shadow-2xl">
+            <!-- Logo / Name -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-accent-purple flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-105 transition-transform">
+                    TK
+                </div>
+                <span class="font-bold text-xl tracking-tight text-white group-hover:text-brand-400 transition-colors">
+                    Trần Tuấn Khôi
+                </span>
+            </a>
+
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center gap-8 font-medium text-sm text-gray-300">
+                <a href="#about" class="hover:text-brand-400 transition-colors flex items-center gap-1.5"><i class="fa-solid font-sm fa-user text-xs"></i> Giới thiệu</a>
+                <a href="#education" class="hover:text-brand-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap text-xs"></i> Học vấn</a>
+                <a href="#experience" class="hover:text-brand-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-briefcase text-xs"></i> Định hướng</a>
+                <a href="#hobbies" class="hover:text-brand-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-gamepad text-xs"></i> Sở thích & Thành tích</a>
+            </div>
+
+            <!-- Action Button -->
+            <div class="flex items-center gap-3">
+                <a href="#contact" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-accent-purple text-white text-sm font-semibold hover:shadow-lg hover:shadow-brand-500/25 transition-all transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-paper-plane mr-2"></i>Liên hệ
+                </a>
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white p-2">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden max-w-7xl mx-auto glass-card mt-2 rounded-2xl p-4 space-y-3">
+            <a href="#about" class="block py-2 px-4 rounded-lg hover:bg-gray-800 text-gray-200">Giới thiệu</a>
+            <a href="#education" class="block py-2 px-4 rounded-lg hover:bg-gray-800 text-gray-200">Học vấn</a>
+            <a href="#experience" class="block py-2 px-4 rounded-lg hover:bg-gray-800 text-gray-200">Định hướng</a>
+            <a href="#hobbies" class="block py-2 px-4 rounded-lg hover:bg-gray-800 text-gray-200">Sở thích & Thành tích</a>
+            <a href="#contact" class="block py-2 px-4 rounded-lg hover:bg-gray-800 text-gray-200">Liên hệ</a>
+        </div>
+    </header>
+
+    <section class="min-h-[85vh] flex items-center justify-center px-4 lg:px-12 py-12 relative">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <!-- Hero Left Content -->
+            <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-brand-500/30 text-brand-400 text-sm font-medium">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Sinh viên Đại học • Sẵn sàng học hỏi
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight">
+                    Xin chào, Tôi là <br>
+                    <span class="gradient-text">Trần Tuấn Khôi</span>
+                </h1>
+
+                <p class="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                    Một sinh viên trẻ tuổi đam mê khám phá công nghệ, phát triển tư duy chiến thuật thông qua <strong class="text-white">Cờ vua</strong> và không ngừng tích lũy tri thức cho tương lai.
+                </p>
+
+                <!-- Key Tags -->
+                <div class="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
+                    <span class="px-3.5 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700 text-xs font-semibold text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-cake-candles text-brand-400"></i> 01/01/2008
+                    </span>
+                    <span class="px-3.5 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700 text-xs font-semibold text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-rose-400"></i> Việt Nam
+                    </span>
+                    <span class="px-3.5 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700 text-xs font-semibold text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> Huy chương cờ vua
+                    </span>
+                </div>
+
+                <!-- Call to Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                    <a href="#about" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-accent-purple text-white font-semibold shadow-lg shadow-brand-500/20 hover:scale-105 transition-all text-center">
+                        <i class="fa-solid fa-user-check mr-2"></i>Khám phá hồ sơ
+                    </a>
+                    <a href="#chess-puzzle" class="px-8 py-3.5 rounded-xl glass-card hover:bg-gray-800 border border-gray-700 text-white font-semibold transition-all text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-chess-king text-amber-400"></i> Thử tài Cờ vua
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero Right Card / Visual -->
+            <div class="lg:col-span-5 flex justify-center">
+                <div class="relative w-full max-w-md">
+                    <!-- Glowing decorative aura -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 via-accent-purple to-pink-500 rounded-3xl blur-xl opacity-40 animate-pulse"></div>
+                    
+                    <div class="relative glass-card rounded-3xl p-8 space-y-6 text-center border border-white/10 shadow-2xl">
+                        <!-- Profile Avatar Holder -->
+                        <div class="relative w-36 h-36 mx-auto">
+                            <div class="w-full h-full rounded-full bg-gradient-to-tr from-brand-500 via-accent-purple to-indigo-600 p-1">
+                                <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                                    <i class="fa-solid fa-user-graduate text-6xl text-brand-400 animate-float"></i>
+                                </div>
+                            </div>
+                            <!-- Badge -->
+                            <div class="absolute bottom-0 right-0 bg-amber-500 text-gray-900 p-2.5 rounded-full shadow-lg font-bold text-xs flex items-center justify-center border-2 border-gray-900" title="Huy chương Đồng Cờ vua">
+                                <i class="fa-solid fa-award text-base"></i>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Trần Tuấn Khôi</h2>
+                            <p class="text-sm text-brand-400 font-medium mt-1">Sinh viên Đại học • Đam mê học hỏi</p>
+                        </div>
+
+                        <!-- Mini Stats Grid -->
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div class="p-3 rounded-2xl bg-gray-800/50 border border-gray-700/50 text-center">
+                                <p class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-chess"></i> Cờ vua</p>
+                                <p class="text-xs text-gray-400 mt-1">Huy chương Đồng</p>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-gray-800/50 border border-gray-700/50 text-center">
+                                <p class="text-2xl font-bold text-emerald-400"><i class="fa-solid fa-gamepad"></i> Gaming</p>
+                                <p class="text-xs text-gray-400 mt-1">Chiến thuật & Giải trí</p>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-gray-400 italic pt-2 border-t border-gray-800">
+                            "Mỗi nước cờ là một bài học tư duy, mỗi thử thách là bước đệm trưởng thành."
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="about" class="py-20 px-4 lg:px-12 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-brand-400">Thông tin cá nhân</h2>
+            <p class="text-3xl sm:text-4xl font-extrabold text-white">Lý Lịch & Quá Trình Học Tập</p>
+            <div class="w-16 h-1 bg-gradient-to-r from-brand-500 to-accent-purple mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- Card 1: Thông tin cơ bản -->
+            <div class="glass-card glass-card-hover rounded-2xl p-6 space-y-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Sơ Lược Bản Thân</h3>
+                <ul class="space-y-3 text-sm text-gray-300">
+                    <li class="flex items-center justify-between pb-2 border-b border-gray-800">
+                        <span class="text-gray-400">Họ và tên:</span>
+                        <span class="font-semibold text-white">Trần Tuấn Khôi</span>
+                    </li>
+                    <li class="flex items-center justify-between pb-2 border-b border-gray-800">
+                        <span class="text-gray-400">Ngày sinh:</span>
+                        <span class="font-semibold text-white">01 / 01 / 2008</span>
+                    </li>
+                    <li class="flex items-center justify-between pb-2 border-b border-gray-800">
+                        <span class="text-gray-400">Địa chỉ:</span>
+                        <span class="font-semibold text-white">Việt Nam</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-400">Trạng thái:</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Sinh viên chủ động
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Card 2: Quá trình học tập -->
+            <div id="education" class="glass-card glass-card-hover rounded-2xl p-6 space-y-4">
+                <div class="w-12 h-12 rounded-xl bg-accent-purple/10 border border-accent-purple/30 text-accent-purple flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Quá Trình Học Tập</h3>
+                <div class="space-y-4">
+                    <div class="relative pl-6 border-l-2 border-accent-purple/40 space-y-1">
+                        <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-accent-purple"></div>
+                        <span class="text-xs font-bold text-accent-purple uppercase tracking-wider">Hiện tại</span>
+                        <h4 class="font-bold text-white text-base">Bậc Đại Học</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">
+                            Đang theo học chương trình Đại học, tập trung xây dựng nền tảng tư duy khoa học, phương pháp nghiên cứu và phát triển toàn diện các kỹ năng sống.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Lĩnh vực chuyên môn -->
+            <div class="glass-card glass-card-hover rounded-2xl p-6 space-y-4 md:col-span-2 lg:col-span-1">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Lĩnh Vực Chuyên Môn</h3>
+                <p class="text-sm text-gray-300 leading-relaxed">
+                    Hiện tại <strong class="text-white">chưa định hình chuyên môn cố định</strong>, đang trong giai đoạn tích cực trau dồi tri thức, trải nghiệm đa dạng lĩnh vực công nghệ & quản lý để lựa chọn hướng đi phù hợp nhất.
+                </p>
+                <div class="pt-2">
+                    <div class="text-xs font-semibold text-gray-400 mb-2">Đang định hướng & học tập:</div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2.5 py-1 rounded-md bg-gray-800 text-xs text-gray-300">Tư duy Công nghệ</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-800 text-xs text-gray-300">Phân tích Chiến thuật</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-800 text-xs text-gray-300">Kỹ năng số</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="experience" class="py-20 px-4 lg:px-12 max-w-7xl mx-auto">
+        <div class="glass-card rounded-3xl p-8 lg:p-12 relative overflow-hidden">
+            <!-- Decorative Light Blur -->
+            <div class="absolute -top-24 -right-24 w-72 h-72 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-wider">
+                        Kinh Nghiệm & Tiềm Năng
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+                        Hành Trình Tích Lũy <br>
+                        <span class="gradient-text">Kinh Nghiệm & Kỹ Năng</span>
+                    </h2>
+                    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                        Mặc dù ở thời điểm hiện tại <strong class="text-white">chưa có kinh nghiệm làm việc thực tế</strong> tại doanh nghiệp, tôi luôn giữ tinh thần sẵn sàng học hỏi, năng động tham gia các hoạt động và liên tục rèn luyện kỹ năng mềm.
+                    </p>
+
+                    <!-- Interactive Highlights List -->
+                    <div class="space-y-4 pt-2">
+                        <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-900/60 border border-gray-800">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-brain text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Tư Duy Chiến Thuật & Sáng Tạo</h4>
+                                <p class="text-xs text-gray-400 mt-1">Được rèn luyện thông qua bộ môn Cờ vua và các tựa game chiến thuật.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-900/60 border border-gray-800">
+                            <div class="w-10 h-10 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-arrows-spin text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Thích Nghi & Học Hỏi Nhanh</h4>
+                                <p class="text-xs text-gray-400 mt-1">Sẵn sàng tiếp thu kiến thức mới, công nghệ mới với thái độ cầu thị.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skill Progress Visualization -->
+                <div class="lg:col-span-6 space-y-6">
+                    <h3 class="text-lg font-bold text-white mb-4">Chỉ Số Rèn Luyện Cá Nhân</h3>
+
+                    <!-- Progress Bar 1 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-gray-300">Tư duy logic & Phân tích (Cờ vua)</span>
+                            <span class="text-brand-400">85%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-brand-500 to-accent-purple rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar 2 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-gray-300">Khả năng phản xạ & Ra quyết định (Gaming)</span>
+                            <span class="text-accent-purple">80%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-accent-purple to-pink-500 rounded-full" style="width: 80%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar 3 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-gray-300">Tinh thần tự học & Tích lũy kiến thức</span>
+                            <span class="text-emerald-400">90%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quote Banner -->
+                    <div class="p-4 rounded-xl bg-brand-500/5 border border-brand-500/20 text-center">
+                        <p class="text-xs text-brand-300 italic">
+                            "Kinh nghiệm không chỉ tính bằng thời gian làm việc, mà bằng chiều sâu học hỏi trong mỗi trải nghiệm."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hobbies" class="py-20 px-4 lg:px-12 max-w-7xl mx-auto space-y-16">
+        
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-amber-400">Điểm Nổi Bật</h2>
+            <p class="text-3xl sm:text-4xl font-extrabold text-white">Thành Tích & Sở Thích Cá Nhân</p>
+            <div class="w-16 h-1 bg-gradient-to-r from-amber-400 to-rose-500 mx-auto rounded-full"></div>
+        </div>
+
+        <!-- Section 1: Dynamic Achievement Banner -->
+        <div class="relative glass-card rounded-3xl p-8 lg:p-10 border border-amber-500/30 overflow-hidden">
+            <div class="absolute -bottom-10 -right-10 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                <!-- Icon Award Showcase -->
+                <div class="md:col-span-4 flex flex-col items-center justify-center text-center p-6 bg-gradient-to-b from-amber-500/10 to-transparent rounded-2xl border border-amber-500/20">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 flex items-center justify-center shadow-2xl shadow-amber-500/30 mb-4 animate-bounce">
+                        <i class="fa-solid fa-trophy text-4xl text-gray-900"></i>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs uppercase tracking-wider mb-1">
+                        Cấp Huyện
+                    </span>
+                    <h3 class="text-2xl font-black text-white">Huy Chương Đồng</h3>
+                    <p class="text-xs text-gray-400 mt-1">Giải Đấu Cờ Vua Cấp Huyện</p>
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-8 space-y-4">
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <i class="fa-solid fa-chess-knight text-amber-400"></i>
+                        Đam Mê Cờ Vua & Tư Duy Chiến Thuật
+                    </h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Thành tích <strong class="text-amber-400">Huy chương Đồng Cờ vua cấp huyện</strong> là minh chứng cho sự kiên trì, khả năng phân tích nước đi và bản lĩnh giữ bình tĩnh dưới áp lực. Cờ vua không chỉ là môn thể thao trí tuệ mà còn giúp Khôi hình dung các bài toán cuộc sống theo góc nhìn chiến lược dài hạn.
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                        <div class="p-3 rounded-xl bg-gray-900/80 border border-gray-800 text-center">
+                            <span class="block text-amber-400 font-bold text-lg">Kiên Nhẫn</span>
+                            <span class="text-[11px] text-gray-400">Tính toán nước đi</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gray-900/80 border border-gray-800 text-center">
+                            <span class="block text-brand-400 font-bold text-lg">Tập Trung</span>
+                            <span class="text-[11px] text-gray-400">Kiểm soát tình huống</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gray-900/80 border border-gray-800 text-center col-span-2 sm:col-span-1">
+                            <span class="block text-emerald-400 font-bold text-lg">Bản Lĩnh</span>
+                            <span class="text-[11px] text-gray-400">Vượt qua thử thách</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Sở Thích Chơi Game -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            
+            <div class="glass-card rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Sở Thích: Chơi Game (E-Sports)</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed mb-4">
+                        Chơi game đối với Khôi không chỉ dừng lại ở việc giải trí sau giờ học căng thẳng, mà còn là môi trường rèn luyện phản xạ nhanh, phối hợp đồng đội và xây dựng chiến thuật linh hoạt.
+                    </p>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-rose-400"></i> Game Chiến Thuật & Trí Tuệ (Strategy / Puzzle)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-rose-400"></i> Game Đồng Đội Đối Kháng (MOBA / Tactical)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-rose-400"></i> Khám phá cốt truyện & công nghệ game
+                        </li>
+                    </ul>
+                </div>
+                <div class="pt-4 border-t border-gray-800 text-xs text-gray-400 italic">
+                    <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>
+                    Chơi game có điều độ giúp tăng cường khả năng tập trung và giải quyết vấn đề sáng tạo.
+                </div>
+            </div>
+
+            <!-- Section 3: Bàn Cờ Vua Tương Tác Trực Tiếp -->
+            <div id="chess-puzzle" class="glass-card rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chess-board text-amber-400"></i>
+                        Thử Tài Cờ Vua: Chiếu Hết 1 Nước!
+                    </h3>
+                    <span id="chess-status" class="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 font-semibold">
+                        Lượt Trắng Đi
+                    </span>
+                </div>
+                <p class="text-xs text-gray-400">
+                    Trắng đi trước. Hãy chọn **Hậu Trắng (♕)** và di chuyển đến ô thích hợp để chiếu hết Vua Đen!
+                </p>
+
+                <!-- Chess Board Container -->
+                <div class="max-w-[280px] mx-auto grid grid-cols-4 border-2 border-gray-700 rounded-lg overflow-hidden shadow-xl" id="mini-chess-board">
+                    <!-- Board cells JS populated -->
+                </div>
+
+                <!-- Feedback Message -->
+                <div id="chess-feedback" class="text-center text-xs font-semibold h-6 text-gray-400">
+                    Nhấp vào Hậu Trắng (♕) để bắt đầu!
+                </div>
+                <div class="text-center">
+                    <button id="reset-chess-btn" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Làm mới bàn cờ
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section id="contact" class="py-20 px-4 lg:px-12 max-w-7xl mx-auto">
+        <div class="glass-card rounded-3xl p-8 lg:p-12 relative overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                
+                <!-- Contact Info -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-500/10 text-brand-400 text-xs font-bold uppercase tracking-wider">
+                        Kết nối
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-white">
+                        Liên Hệ Với <br>
+                        <span class="gradient-text">Trần Tuấn Khôi</span>
+                    </h2>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Bạn muốn giao lưu cờ vua, trao đổi về học tập hoặc thảo luận các dự án tiềm năng? Đừng ngần ngại gửi tin nhắn cho Khôi nhé!
+                    </p>
+
+                    <div class="space-y-4 pt-2">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-brand-400">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Email cá nhân</p>
+                                <p class="text-sm font-semibold text-white">tuankhoi01012008@gmail.com</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-rose-400">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Khu vực</p>
+                                <p class="text-sm font-semibold text-white">Việt Nam</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Icons -->
+                    <div class="pt-4 flex gap-3">
+                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-brand-500 text-gray-300 hover:text-white flex items-center justify-center transition-all">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-accent-purple text-gray-300 hover:text-white flex items-center justify-center transition-all">
+                            <i class="fa-brands fa-discord"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-emerald-500 text-gray-300 hover:text-white flex items-center justify-center transition-all">
+                            <i class="fa-brands fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="lg:col-span-7 bg-gray-900/70 p-6 sm:p-8 rounded-2xl border border-gray-800">
+                    <form id="contact-form" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-xs font-semibold text-gray-300">Họ và tên</label>
+                                <input type="text" required placeholder="Nhập tên của bạn..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-brand-400 transition-colors">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-semibold text-gray-300">Email liên hệ</label>
+                                <input type="email" required placeholder="example@domain.com" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-brand-400 transition-colors">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-gray-300">Chủ đề</label>
+                            <input type="text" placeholder="Giao lưu / Học tập / Hợp tác..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-brand-400 transition-colors">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-gray-300">Nội dung tin nhắn</label>
+                            <textarea rows="4" required placeholder="Viết lời nhắn tại đây..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-brand-400 transition-colors resize-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-accent-purple text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-brand-500/20">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Gửi Tin Nhắn
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 border-t border-gray-800 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p>© 2026 Trần Tuấn Khôi. Bản quyền thông tin cá nhân.</p>
+            <p class="text-gray-600">Thiết kế hiện đại chuẩn Responsive • Sáng tạo & Đam mê</p>
+        </div>
+    </footer>
+
+    <!-- Custom Notification Modal (No alert) -->
+    <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-2xl p-6 max-w-sm w-full text-center space-y-4 border border-brand-500/30">
+            <div id="modal-icon" class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mx-auto">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 id="modal-title" class="text-lg font-bold text-white">Thông báo</h3>
+            <p id="modal-msg" class="text-xs text-gray-300 leading-relaxed">Nội dung tin nhắn</p>
+            <button id="modal-close" class="w-full py-2 rounded-xl bg-brand-500 text-white font-semibold text-xs hover:bg-brand-600 transition-colors">
+                Đóng
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Implementation -->
+    <script>
+        // Canvas Particle Background
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(56, 189, 248, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close Mobile Menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // Modal Helper Functions
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMsg = document.getElementById('modal-msg');
+        const modalClose = document.getElementById('modal-close');
+
+        function showCustomModal(title, message) {
+            modalTitle.textContent = title;
+            modalMsg.textContent = message;
+            modal.classList.remove('hidden');
+        }
+
+        modalClose.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Interactive Mini Chess Challenge
+        // 4x4 simplified board: Black King at top right (row 0, col 3), White Queen at bottom left (row 3, col 0), White King at bottom right (row 3, col 3)
+        // Checkmate target for White Queen is (row 0, col 2) or (row 1, col 3)
+        
+        const boardElem = document.getElementById('mini-chess-board');
+        const feedbackElem = document.getElementById('chess-feedback');
+        const statusElem = document.getElementById('chess-status');
+        const resetChessBtn = document.getElementById('reset-chess-btn');
+
+        let selectedPiece = null;
+        let isMateSolved = false;
+
+        // Initial board state
+        const initialBoard = [
+            ['', '', '', '♚'],
+            ['', '', '', ''],
+            ['', '', '', ''],
+            ['♕', '', '', '♔']
+        ];
+
+        let currentBoard = JSON.parse(JSON.stringify(initialBoard));
+
+        function renderChessBoard() {
+            boardElem.innerHTML = '';
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const square = document.createElement('div');
+                    const isDark = (r + c) % 2 === 1;
+                    square.className = `chess-square ${isDark ? 'square-dark' : 'square-light'}`;
+                    
+                    if (selectedPiece && selectedPiece.r === r && selectedPiece.c === c) {
+                        square.classList.add('square-selected');
+                    }
+
+                    // Render valid target highlight if queen selected
+                    if (selectedPiece && selectedPiece.r === 3 && selectedPiece.c === 0) {
+                        if ((r === 0 && c === 3) || (r === 0 && c === 0) || (r === 0 && c === 2)) {
+                            if (currentBoard[r][c] === '') square.classList.add('square-target');
+                        }
+                    }
+
+                    square.textContent = currentBoard[r][c];
+
+                    square.addEventListener('click', () => handleSquareClick(r, c));
+                    boardElem.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(r, c) {
+            if (isMateSolved) return;
+
+            const piece = currentBoard[r][c];
+
+            // Select White Queen
+            if (piece === '♕') {
+                selectedPiece = { r, c };
+                feedbackElem.textContent = 'Đã chọn Hậu (♕). Hãy chọn ô hợp lệ để chiếu hết Vua Đen!';
+                feedbackElem.className = 'text-center text-xs font-semibold text-brand-400 h-6';
+                renderChessBoard();
+                return;
+            }
+
+            // If Queen was selected and clicked an empty cell
+            if (selectedPiece && selectedPiece.r === 3 && selectedPiece.c === 0) {
+                // Correct winning move: (0, 2) or (1, 3)
+                if (r === 0 && c === 2) {
+                    currentBoard[selectedPiece.r][selectedPiece.c] = '';
+                    currentBoard[r][c] = '♕';
+                    selectedPiece = null;
+                    isMateSolved = true;
+
+                    feedbackElem.textContent = '🎉 CHÍNH XÁC! Hậu chiếu hết Vua Đen! Khả năng quan sát rất tuyệt vời!';
+                    feedbackElem.className = 'text-center text-xs font-bold text-emerald-400 h-6';
+                    statusElem.textContent = 'Thắng Lợi!';
+                    statusElem.className = 'text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold';
+                    
+                    renderChessBoard();
+                    showCustomModal('Chiếu Hết Tận Cùng!', 'Chúc mừng bạn đã giải thành công câu đố Cờ vua 1 nước! Khả năng tư duy chiến thuật của bạn rất ấn tượng.');
+                } else {
+                    feedbackElem.textContent = '❌ Nước đi chưa tối ưu! Nước này chưa chiếu hết. Hãy thử lại!';
+                    feedbackElem.className = 'text-center text-xs font-semibold text-rose-400 h-6';
+                }
+            }
+        }
+
+        resetChessBtn.addEventListener('click', () => {
+            currentBoard = JSON.parse(JSON.stringify(initialBoard));
+            selectedPiece = null;
+            isMateSolved = false;
+            feedbackElem.textContent = 'Nhấp vào Hậu Trắng (♕) để bắt đầu!';
+            feedbackElem.className = 'text-center text-xs font-semibold text-gray-400 h-6';
+            statusElem.textContent = 'Lượt Trắng Đi';
+            statusElem.className = 'text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 font-semibold';
+            renderChessBoard();
+        });
+
+        renderChessBoard();
+
+        // Contact Form Handling
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showCustomModal(
+                'Gửi Tin Nhắn Thành Công!',
+                'Cảm ơn bạn đã liên hệ với Trần Tuấn Khôi. Khôi sẽ phản hồi tin nhắn của bạn trong thời gian sớm nhất!'
+            );
+            contactForm.reset();
+        });
+    </script>
+</body>
+</html>
